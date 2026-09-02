@@ -11,5 +11,17 @@ window.BOOKS = [
     tag: "已就绪",
     accent: "#ff7eb6",
     url: "Basicreading200-1/Basicreading200-1.html"
+  },
+  {
+    id: "book2",
+    title: "200词 第二册",
+    subtitle: "Basic Reading 200 Key Words 2",
+    author: "Anne Hendler · Jenna Myers",
+    cover: "Basicreading200-2/thumbs/001.jpg",
+    pages: 80,
+    withAudio: 53,
+    tag: "已就绪",
+    accent: "#7c5cff",
+    url: "Basicreading200-2/Basicreading200-2.html"
   }
 ];
