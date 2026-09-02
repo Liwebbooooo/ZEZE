@@ -1,0 +1,12 @@
+# Wrangler 会把资源目录里的每个文件都上传，必须显式排除 .git：
+# .git/objects/pack/*.pack 有 31.5 MiB，超过 Cloudflare 单文件 25 MiB 上限
+**/.git
+**/.git/**
+.git/
+
+# 其他不应对外发布的目录/文件
+**/.workbuddy
+**/.workbuddy/**
+**/node_modules
+**/.DS_Store
+**/Thumbs.db
