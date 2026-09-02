@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>我的小书架 · 200词</title>
+<style>
+  :root{
+    --bg1:#fef6ff; --bg2:#eef6ff; --bg3:#f3fff6;
+    --card:#ffffff; --ink:#2b2f44; --sub:#7a8098;
+    --accent:#ff7eb6; --accent2:#7c5cff; --accent3:#22c1a4;
+    --line:#eceffb;
+    --shadow:0 12px 36px rgba(70,80,140,.14);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, var(--bg1), transparent 60%),
+      radial-gradient(1000px 500px at 110% 0%, var(--bg2), transparent 55%),
+      linear-gradient(180deg, var(--bg3), #ffffff 60%);
+    min-height:100vh;
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+  header.top{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .logo{
+    width:60px;height:60px;border-radius:20px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-size:32px;
+    box-shadow:var(--shadow);
+  }
+  h1{font-size:clamp(22px,5vw,34px);margin:0;font-weight:800;letter-spacing:.5px;}
+  .sub{color:var(--sub);font-size:14px;margin-top:4px;}
+
+  .hero{
+    background:linear-gradient(135deg,#fff0f7,#eef6ff);
+    border-radius:24px;padding:18px 22px;margin-bottom:22px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    box-shadow:var(--shadow);
+  }
+  .hero .hi{font-size:22px;font-weight:800;}
+  .hero .tag{background:#fff;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;color:#c23b7e;}
+
+  .grid{
+    display:grid;gap:22px;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  }
+
+  .book{
+    background:var(--card);border-radius:24px;padding:14px;
+    box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+    cursor:pointer;transition:transform .15s ease,box-shadow .2s ease;
+    text-align:left;border:0;color:inherit;font:inherit;
+  }
+  .book:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(70,80,140,.22);}
+  .book:active{transform:scale(.99);}
+  .book .cover{
+    position:relative;width:100%;aspect-ratio:3/4;border-radius:18px;overflow:hidden;
+    background:#f4f6fb;display:flex;align-items:center;justify-content:center;
+  }
+  .book .cover img{width:100%;height:100%;object-fit:cover;display:block;}
+  .book .ribbon{
+    position:absolute;top:12px;right:-32px;transform:rotate(35deg);
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;font-size:11px;font-weight:800;padding:4px 36px;letter-spacing:1px;
+  }
+  .book .title{font-size:17px;font-weight:800;line-height:1.3;}
+  .book .subtitle{font-size:12px;color:var(--sub);font-weight:600;}
+  .book .stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;}
+  .book .chip{
+    background:#f4f6fb;color:var(--ink);font-size:11px;font-weight:700;
+    padding:5px 10px;border-radius:999px;
+  }
+  .book .chip.a{background:#fff0f7;color:#c23b7e;}
+  .book .enter{
+    margin-top:2px;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+    font-weight:800;font-size:14px;padding:10px 0;border-radius:14px;
+  }
+  .book .enter .arr{font-size:16px;}
+
+  .add{
+    background:repeating-linear-gradient(45deg,#fafbfe,#fafbfe 8px,#f4f6fb 8px,#f4f6fb 16px);
+    border:2.5px dashed #c8cee0;border-radius:24px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:340px;color:var(--sub);font-weight:800;cursor:default;
+    text-align:center;padding:24px;line-height:1.6;
+  }
+  .add .plus{font-size:54px;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .add .hint{font-size:13px;color:var(--sub);font-weight:600;}
+
+  footer{text-align:center;color:var(--sub);font-size:12px;margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">📚</div>
+    <div>
+      <h1>我的小书架</h1>
+      <div class="sub">Basic Reading 200 · 点击封面进入阅读与音频播放</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hi">👋 欢迎挑一本开始读</div>
+    <div class="tag" id="hertag">共 1 册</div>
+    <div class="tag" style="background:#eafbf3;color:#1a9c75;">53 / 80 页含音频</div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <footer>把新书加进 <code>books.js</code> 即可出现在书架上</footer>
+</div>
+
+<script src="books.js"></script>
+<script>
+(function(){
+  var books = window.BOOKS || [];
+  var grid = document.getElementById('grid');
+  document.getElementById('hertag').textContent = '共 ' + books.length + ' 册';
+
+  function bookCard(b){
+    var btn = document.createElement('button');
+    btn.className = 'book';
+    btn.type = 'button';
+    btn.innerHTML =
+      '<div class="cover">'+
+        (b.cover ? '<img src="'+b.cover+'" alt="'+b.title+'">' : '<div style="color:#aaa">暂无封面</div>')+
+        (b.tag ? '<div class="ribbon">'+b.tag+'</div>' : '')+
+      '</div>'+
+      '<div class="title">'+b.title+'</div>'+
+      (b.subtitle ? '<div class="subtitle">'+b.subtitle+'</div>' : '')+
+      '<div class="stats">'+
+        '<span class="chip">📄 '+b.pages+' 页</span>'+
+        '<span class="chip a">🎧 '+b.withAudio+' 页含音频</span>'+
+        (b.author ? '<span class="chip">✍️ '+b.author+'</span>' : '')+
+      '</div>'+
+      '<div class="enter">进入阅读 <span class="arr">→</span></div>';
+    btn.addEventListener('click', function(){ window.location.href = b.url; });
+    return btn;
+  }
+
+  function addCard(){
+    var d = document.createElement('div');
+    d.className = 'add';
+    d.innerHTML = '<div class="plus">+</div><div>敬请期待</div><div class="hint">把新书 PDF + 音频放进文件夹，<br>再编辑 <code>books.js</code> 添加一册即可上架</div>';
+    return d;
+  }
+
+  books.forEach(function(b){ grid.appendChild(bookCard(b)); });
+  // 始终在最后留一个「敬请期待」位
+  grid.appendChild(addCard());
+})();
+</script>
+</body>
+</html>

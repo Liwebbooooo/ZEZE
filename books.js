@@ -1,0 +1,15 @@
+/* 总页面书库：以后每加一册只改这里 */
+window.BOOKS = [
+  {
+    id: "book1",
+    title: "200词 第一册",
+    subtitle: "Basic Reading 200 Key Words 1",
+    author: "Walton Burns · Tamara Wilburn",
+    cover: "Basicreading200-1/thumbs/001.jpg",
+    pages: 80,
+    withAudio: 53,
+    tag: "已就绪",
+    accent: "#ff7eb6",
+    url: "Basicreading200-1/Basicreading200-1.html"
+  }
+];
