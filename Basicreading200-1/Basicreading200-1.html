@@ -52,15 +52,18 @@
   .count{font-size:13px;color:var(--sub);}
 
   .grid{
-    display:grid;gap:22px;
-    /* 对开书：每行左右两页 */
-    grid-template-columns:repeat(2,minmax(0,1fr));
+    /* 对开书：每行左右两页，整组居中且两页紧邻 */
+    --gap:22px;
+    display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);
   }
   .page{
     background:var(--card);border-radius:22px;padding:12px;box-shadow:var(--shadow);
     display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
     transition:transform .15s ease,box-shadow .2s ease,background .2s ease;
     border-top:3px solid transparent;
+    width:calc(50% - var(--gap)/2);
+    /* 按视口高度限制卡片宽度，保证平板横屏一整跨页能在一屏内看完 */
+    max-width:clamp(200px, calc((100vh - 330px) * .75), 520px);
   }
   .page:active{transform:scale(.99);}
   .page.playing{
@@ -68,8 +71,18 @@
     border-top-color:var(--accent);
     box-shadow:0 14px 36px rgba(255,126,182,.28);
   }
-  @media (max-width:1000px){ .grid{gap:16px;} }
-  @media (max-width:560px){ .grid{gap:12px;} .page{padding:9px;gap:8px;} }
+  @media (max-width:1000px){ .grid{--gap:16px;} }
+  @media (max-width:560px){ .grid{--gap:12px;} .page{padding:9px;gap:8px;} }
+  /* 横屏矮屏（手机横放等）：压缩顶栏与卡片，避免一跨页超出一屏 */
+  @media (max-height:600px){
+    body{padding-top:10px;padding-bottom:120px;}
+    header.top{margin-bottom:8px;gap:8px;}
+    .logo{width:36px;height:36px;font-size:20px;border-radius:12px;}
+    h1{font-size:16px;}
+    .sub{display:none;}
+    .search{width:min(30vw,140px);padding:7px 12px;font-size:13px;}
+    .page{ max-width:clamp(180px, calc((100vh - 150px) * .75), 520px); }
+  }
 
   /* 顶部环境警告条 */
   .warn{
