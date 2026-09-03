@@ -53,7 +53,8 @@
 
   .grid{
     display:grid;gap:22px;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    /* 对开书：每行左右两页 */
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
   .page{
     background:var(--card);border-radius:22px;padding:12px;box-shadow:var(--shadow);
@@ -67,7 +68,7 @@
     border-top-color:var(--accent);
     box-shadow:0 14px 36px rgba(255,126,182,.28);
   }
-  @media (max-width:1000px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;} }
+  @media (max-width:1000px){ .grid{gap:16px;} }
   @media (max-width:560px){ .grid{gap:12px;} .page{padding:9px;gap:8px;} }
 
   /* 顶部环境警告条 */
@@ -264,8 +265,11 @@
 
   function render(){
     grid.innerHTML='';
-    // 每页独立成一张卡片
-    items.forEach(function(it){ grid.appendChild(buildPage(it)); });
+    // 对开书排序：第一行 = 封面一(001) + 封面二(080)，其后按 (2,3)(4,5)… 左右成对
+    var order = items.length > 1
+      ? [items[0], items[items.length-1]].concat(items.slice(1, items.length-1))
+      : items;
+    order.forEach(function(it){ grid.appendChild(buildPage(it)); });
     document.getElementById('total').textContent = items.length;
     document.getElementById('withaudio').textContent = items.filter(function(i){return i.tracks&&i.tracks.length;}).length;
   }
