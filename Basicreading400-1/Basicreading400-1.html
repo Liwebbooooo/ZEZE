@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Basic Reading 400 Key Words 1 · 音频播放</title>
+<style>
+  :root{
+    --bg1:#fef6ff; --bg2:#eef6ff; --bg3:#f3fff6;
+    --card:#ffffff; --ink:#2b2f44; --sub:#7a8098;
+    --accent:#ff7eb6; --accent2:#7c5cff; --accent3:#22c1a4;
+    --chip:#fff0f7; --chip-on:#ff7eb6; --line:#eceffb;
+    --shadow:0 10px 30px rgba(70,80,140,.12);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, var(--bg1), transparent 60%),
+      radial-gradient(1000px 500px at 110% 0%, var(--bg2), transparent 55%),
+      linear-gradient(180deg, var(--bg3), #ffffff 60%);
+    min-height:100vh;
+    padding:22px 16px 150px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+  header.top{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .logo{
+    width:54px;height:54px;border-radius:18px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+    box-shadow:var(--shadow);
+  }
+  h1{font-size:clamp(20px,4.5vw,30px);margin:0;font-weight:800;letter-spacing:.5px;}
+  .sub{color:var(--sub);font-size:13px;margin-top:2px;}
+  .back{
+    flex:0 0 auto;display:flex;align-items:center;gap:4px;text-decoration:none;
+    color:#c23b7e;background:#fff;border:1.5px solid var(--line);border-radius:999px;
+    padding:10px 15px;font-size:13px;font-weight:800;transition:border-color .15s ease;
+  }
+  .back:hover{border-color:var(--accent2);}
+  .tools{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .search{
+    border:1.5px solid var(--line);background:#fff;border-radius:999px;
+    padding:10px 16px;font-size:14px;width:min(46vw,260px);outline:none;color:var(--ink);
+  }
+  .search:focus{border-color:var(--accent2);box-shadow:0 0 0 4px rgba(124,92,255,.12);}
+  .count{font-size:13px;color:var(--sub);}
+
+  .grid{
+    /* 对开书：每行左右两页，整组居中且两页紧邻 */
+    --gap:22px;
+    display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);
+  }
+  .page{
+    background:var(--card);border-radius:22px;padding:12px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
+    transition:transform .15s ease,box-shadow .2s ease,background .2s ease;
+    border-top:3px solid transparent;
+    width:calc(50% - var(--gap)/2);
+    /* 按视口高度限制卡片宽度，保证平板横屏一整跨页能在一屏内看完 */
+    max-width:clamp(200px, calc((100vh - 330px) * .75), 520px);
+  }
+  .page:active{transform:scale(.99);}
+  .page.playing{
+    background:linear-gradient(180deg,#fff5fa,#ffffff 70%);
+    border-top-color:var(--accent);
+    box-shadow:0 14px 36px rgba(255,126,182,.28);
+  }
+  @media (max-width:1000px){ .grid{--gap:16px;} }
+  @media (max-width:560px){ .grid{--gap:12px;} .page{padding:9px;gap:8px;} }
+  /* 横屏矮屏（手机横放等）：压缩顶栏与卡片，避免一跨页超出一屏 */
+  @media (max-height:600px){
+    body{padding-top:10px;padding-bottom:120px;}
+    header.top{margin-bottom:8px;gap:8px;}
+    .logo{width:36px;height:36px;font-size:20px;border-radius:12px;}
+    h1{font-size:16px;}
+    .sub{display:none;}
+    .search{width:min(30vw,140px);padding:7px 12px;font-size:13px;}
+    .page{ max-width:clamp(180px, calc((100vh - 150px) * .75), 520px); }
+  }
+
+  /* 顶部环境警告条 */
+  .warn{
+    background:linear-gradient(135deg,#fff4e5,#ffe9ef);
+    border:1.5px solid #ffd0a8;border-radius:18px;padding:14px 16px;margin-bottom:16px;
+    font-size:13px;line-height:1.6;
+  }
+  .warn b{color:#b45309;}
+  .warnurl{font-family:ui-monospace,Consolas,monospace;background:#fff;border-radius:8px;padding:2px 6px;font-size:12px;word-break:break-all;}
+  .copybtn{border:none;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin-top:8px;}
+  .thumb{
+    width:100%;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:#f4f6fb;
+    cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;
+  }
+  .thumb img{width:100%;height:100%;object-fit:contain;display:block;}
+  .badge{
+    position:absolute;top:10px;left:10px;background:rgba(43,47,68,.78);color:#fff;
+    font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;backdrop-filter:blur(4px);
+  }
+  .wave{position:absolute;bottom:10px;right:10px;display:none;gap:3px;align-items:flex-end;height:24px;}
+  .page.playing .wave{display:flex;}
+  .wave i{width:4px;background:var(--accent);border-radius:3px;animation:w 1s infinite ease-in-out;}
+  .wave i:nth-child(2){animation-delay:.2s}.wave i:nth-child(3){animation-delay:.4s}.wave i:nth-child(4){animation-delay:.6s}
+  @keyframes w{0%,100%{height:6px}50%{height:22px}}
+  .fname{font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);word-break:break-word;}
+  .fname .ext{color:var(--sub);font-weight:600;}
+  .tracks{display:flex;gap:8px;flex-wrap:wrap;}
+  .track{
+    flex:1 1 auto;min-width:46px;border:none;cursor:pointer;border-radius:14px;
+    background:var(--chip);color:#c23b7e;font-weight:800;font-size:16px;
+    padding:12px 0;display:flex;align-items:center;justify-content:center;gap:6px;
+    transition:background .15s ease,color .15s ease,transform .1s ease;
+  }
+  .track:hover{background:#ffe0ef;}
+  .track:active{transform:scale(.94);}
+  .track.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 8px 18px rgba(255,126,182,.4);}
+  .track .ic{font-size:13px;}
+  .noaudio{font-size:12px;color:var(--sub);background:#f4f6fb;border-radius:14px;padding:12px 0;text-align:center;font-weight:700;}
+  .togglebtn{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font-size:14px;cursor:pointer;color:var(--ink);font-weight:700;transition:all .15s ease;}
+  .togglebtn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(255,126,182,.35);}
+
+  /* now playing dock */
+  .dock{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    display:flex;align-items:center;gap:14px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.82);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);box-shadow:0 -8px 30px rgba(70,80,140,.14);
+  }
+  .dock .dthumb{width:50px;height:50px;border-radius:14px;background:#f4f6fb;flex:0 0 auto;overflow:hidden;display:none;}
+  .dock .dthumb.show{display:block;}
+  .dock .dthumb img{width:100%;height:100%;object-fit:contain;}
+  .dbtn{
+    width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:22px;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(124,92,255,.4);
+    transition:transform .1s ease;
+  }
+  .dbtn:active{transform:scale(.92);}
+  .dinfo{flex:1 1 auto;min-width:0;}
+  .dtitle{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dtrack{font-size:12px;color:var(--sub);margin-top:1px;}
+  .bar{flex:1 1 100%;height:6px;border-radius:99px;background:var(--line);margin-top:8px;cursor:pointer;overflow:hidden;}
+  .bar .fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .12s linear;}
+  .dtime{font-size:11px;color:var(--sub);font-variant-numeric:tabular-nums;margin-top:3px;display:flex;justify-content:space-between;}
+  .hidden{display:none!important;}
+  .empty{text-align:center;color:var(--sub);padding:40px;font-size:14px;}
+  footer{text-align:center;color:var(--sub);font-size:12px;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" href="../index.html">← 书架</a>
+    <div class="logo">🎧</div>
+    <div>
+      <h1>Basic Reading 400 Key Words 1</h1>
+      <div class="sub">点文件名/图片播放，再点一下暂停 · 多音轨可切换</div>
+    </div>
+    <div class="tools">
+      <input id="search" class="search" placeholder="搜索文件名 / 页码…" />
+      <button id="onlyaudio" class="togglebtn" title="隐藏没有音频的卡片">只看有音频</button>
+      <span id="count" class="count"></span>
+    </div>
+  </header>
+
+  <div id="warn" class="warn hidden">
+    <b>⚠ 当前打开方式读取不到本地音频 / 图片</b>
+    <div>预览面板是沙盒环境，访问不到本册文件夹 <code>Basicreading400-1/audio/</code> 里的 mp3。音频文件本身完好（共 51 个），换用下面的地址在浏览器打开即可正常播放：</div>
+    <div><span id="warnurl" class="warnurl">http://127.0.0.1:8123/Basicreading400-1/Basicreading400-1.html</span></div>
+    <button id="copyurl" class="copybtn">复制链接</button>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty hidden">没有匹配的文件</div>
+  <footer>共 <span id="total">0</span> 个文件 · <span id="withaudio">0</span> 个含音频</footer>
+</div>
+
+<div class="dock hidden" id="dock">
+  <div class="dthumb" id="dthumb"><img id="dthumbimg" alt=""></div>
+  <button class="dbtn" id="dplay">▶</button>
+  <div class="dinfo">
+    <div class="dtitle" id="dtitle">—</div>
+    <div class="dtrack" id="dtrack">—</div>
+    <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
+    <div class="dtime"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+  </div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+<script src="data.js"></script>
+<script>
+(function(){
+  var items = window.ITEMS || [];
+  var grid = document.getElementById('grid');
+  var audio = document.getElementById('audio');
+  var dock = document.getElementById('dock');
+  var dplay = document.getElementById('dplay');
+  var dtitle = document.getElementById('dtitle');
+  var dtrack = document.getElementById('dtrack');
+  var fill = document.getElementById('fill');
+  var bar = document.getElementById('bar');
+  var curEl = document.getElementById('cur');
+  var durEl = document.getElementById('dur');
+  var dthumb = document.getElementById('dthumb');
+  var dthumbimg = document.getElementById('dthumbimg');
+  var search = document.getElementById('search');
+  var countEl = document.getElementById('count');
+
+  var state = { n:null, track:null }; // currently loaded
+
+  function enc(p){ return encodeURI(p); }
+  function fmt(t){ if(!isFinite(t)||t<0) t=0; var m=Math.floor(t/60), s=Math.floor(t%60); return m+":"+(s<10?"0":"")+s; }
+  // 从音频文件名提取数字：Track01.mp3 -> "01"
+  function audioNum(tk){
+    var m = /Track(\d+)\.mp3$/i.exec(tk.src || '');
+    if(!m) return '';
+    var n = parseInt(m[1],10);
+    return (n<10?'0':'') + n;
+  }
+
+  function buildPage(it){
+    var page = document.createElement('div');
+    page.className = 'page';
+    page.dataset.n = it.n;
+    page.dataset.search = (it.file + ' ' + it.page).toLowerCase();
+    page.title = it.file; // 原文件名保留为悬停提示，便于核对
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    var img = document.createElement('img');
+    img.src = it.thumb || '';
+    img.alt = it.file;
+    img.loading = 'lazy';
+    thumb.appendChild(img);
+    var badge = document.createElement('div');
+    badge.className = 'badge';
+    badge.textContent = (it.page!=null? ('P '+it.page) : ('#'+it.n));
+    thumb.appendChild(badge);
+    var wave = document.createElement('div');
+    wave.className = 'wave';
+    wave.innerHTML = '<i></i><i></i><i></i><i></i>';
+    thumb.appendChild(wave);
+    thumb.addEventListener('click', function(){ toggle(it, 0); });
+    page.appendChild(thumb);
+
+    page.dataset.hasaudio = (it.tracks && it.tracks.length) ? '1' : '0';
+    if(it.tracks && it.tracks.length){
+      var tr = document.createElement('div');
+      tr.className = 'tracks';
+      it.tracks.forEach(function(tk, idx){
+        var b = document.createElement('button');
+        b.className = 'track';
+        b.dataset.track = idx;
+        b.innerHTML = '<span class="ic">▶</span>' + audioNum(tk);
+        b.title = (tk.src || '').split('/').pop();
+        b.addEventListener('click', function(){ toggle(it, idx); });
+        tr.appendChild(b);
+      });
+      page.appendChild(tr);
+    } else {
+      page.classList.add('noaudio-card');
+      var na = document.createElement('div');
+      na.className = 'noaudio';
+      na.textContent = '暂无音频';
+      page.appendChild(na);
+    }
+    return page;
+  }
+
+  function escapeHtml(s){ return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  function render(){
+    grid.innerHTML='';
+    // 对开书排序：第一行 = 封面一(001) + 封面二(080)，其后按 (2,3)(4,5)… 左右成对
+    var order = items.length > 1
+      ? [items[0], items[items.length-1]].concat(items.slice(1, items.length-1))
+      : items;
+    order.forEach(function(it){ grid.appendChild(buildPage(it)); });
+    document.getElementById('total').textContent = items.length;
+    document.getElementById('withaudio').textContent = items.filter(function(i){return i.tracks&&i.tracks.length;}).length;
+  }
+  render();
+
+  function clearPlayingUI(){
+    document.querySelectorAll('.page.playing').forEach(function(c){ c.classList.remove('playing'); });
+    document.querySelectorAll('.track.on').forEach(function(b){ b.classList.remove('on'); b.querySelector('.ic').textContent='▶'; });
+  }
+
+  function toggle(it, idx){
+    if(!it.tracks || !it.tracks[idx]){
+      dock.classList.remove('hidden');
+      dtitle.textContent = it.file;
+      dtrack.textContent = '该卡片暂无音频';
+      return;
+    }
+    if(state.n===it.n && state.track===idx && !audio.paused){ audio.pause(); return; }
+    loadAndPlay(it, idx);
+  }
+
+  function loadAndPlay(it, idx){
+    clearPlayingUI();
+    state.n = it.n; state.track = idx;
+    var tk = it.tracks[idx];
+    audio.src = enc(tk.src);
+    audio.play().then(function(){ markPlaying(it, idx); }).catch(function(e){
+      // 浏览器自动播放策略拦截时，提示用户手动点一次
+      dtrack.textContent = '请点底部 ▶ 开始播放';
+      console.warn('play blocked by autoplay policy', e);
+    });
+    markPlaying(it, idx);
+    showDock(it, tk);
+  }
+
+  function markPlaying(it, idx){
+    var page = document.querySelector('.page[data-n="'+it.n+'"]');
+    if(page){ page.classList.add('playing'); }
+    if(page){
+      var btns = page.querySelectorAll('.track');
+      if(btns[idx]){ btns[idx].classList.add('on'); btns[idx].querySelector('.ic').textContent='⏸'; }
+    }
+  }
+
+  function showDock(it, tk){
+    dock.classList.remove('hidden');
+    dtitle.textContent = it.file;
+    dtrack.textContent = '音轨 ' + audioNum(tk) + (it.tracks.length>1?(' / 共'+it.tracks.length):'');
+    if(it.thumb){ dthumb.classList.add('show'); dthumbimg.src = it.thumb; } else { dthumb.classList.remove('show'); }
+  }
+
+  dplay.addEventListener('click', function(){
+    if(!audio.src){ return; }
+    if(audio.paused){ audio.play(); } else { audio.pause(); }
+  });
+
+  audio.addEventListener('play', function(){ dplay.textContent='⏸'; });
+  audio.addEventListener('pause', function(){
+    dplay.textContent='▶';
+    var page = document.querySelector('.page[data-n="'+state.n+'"]');
+    if(page){ var b=page.querySelector('.track.on'); if(b) b.querySelector('.ic').textContent='▶'; }
+  });
+  audio.addEventListener('ended', function(){
+    dplay.textContent='▶'; clearPlayingUI(); fill.style.width='0%'; curEl.textContent='0:00';
+  });
+  audio.addEventListener('timeupdate', function(){
+    if(audio.duration){ fill.style.width = (audio.currentTime/audio.duration*100)+'%'; }
+    curEl.textContent = fmt(audio.currentTime);
+  });
+  audio.addEventListener('loadedmetadata', function(){ durEl.textContent = fmt(audio.duration); });
+  audio.addEventListener('error', function(){
+    var raw = audio.currentSrc || audio.src || '';
+    var name = decodeURIComponent(raw.split('/').pop() || '');
+    dtrack.innerHTML = '⚠ 加载失败：' + escapeHtml(name || raw) + ' 读取不到';
+    showWarn(); // 大概率是打开方式问题，给出指引
+    console.error('audio error', raw, audio.error);
+  });
+
+  /* ---------- 环境检测：能否读到本地音频 ---------- */
+  var warnEl = document.getElementById('warn');
+  var warned = false;
+  function showWarn(){
+    if(warned) return;
+    warned = true;
+    warnEl.classList.remove('hidden');
+  }
+  function probeAudio(){
+    var probeSrc = null;
+    for(var i=0;i<items.length;i++){
+      if(items[i].tracks && items[i].tracks[0]){ probeSrc = items[i].tracks[0].src; break; }
+    }
+    if(!probeSrc) return;
+    var a = new Audio();
+    a.preload = 'metadata';
+    a.onerror = function(){ showWarn(); };
+    a.src = enc(probeSrc);
+    // 兜底：若 6 秒内既没加载成功也没报错，多半是路径不可达
+    setTimeout(function(){ if(a.readyState===0) showWarn(); }, 6000);
+  }
+  probeAudio();
+
+  var copyBtn = document.getElementById('copyurl');
+  copyBtn.addEventListener('click', function(){
+    var url = document.getElementById('warnurl').textContent;
+    try{
+      navigator.clipboard.writeText(url);
+      copyBtn.textContent = '已复制 ✓';
+    }catch(e){
+      copyBtn.textContent = '请手动复制：' + url;
+    }
+    setTimeout(function(){ copyBtn.textContent = '复制链接'; }, 2000);
+  });
+
+  bar.addEventListener('click', function(e){
+    if(!audio.duration) return;
+    var r = bar.getBoundingClientRect();
+    audio.currentTime = (e.clientX - r.left)/r.width * audio.duration;
+  });
+
+  var onlyaudio=false;
+  var oaBtn = document.getElementById('onlyaudio');
+  function applyFilter(){
+    var q = search.value.trim().toLowerCase();
+    var shown=0;
+    document.querySelectorAll('.page').forEach(function(c){
+      var ok = (!q || c.dataset.search.indexOf(q)>=0) && (!onlyaudio || c.dataset.hasaudio==='1');
+      c.style.display = ok ? '' : 'none';
+      if(ok) shown++;
+    });
+    document.getElementById('empty').classList.toggle('hidden', shown>0);
+    countEl.textContent = (q||onlyaudio) ? (shown+' / '+items.length) : '';
+  }
+  search.addEventListener('input', applyFilter);
+  oaBtn.addEventListener('click', function(){
+    onlyaudio = !onlyaudio;
+    oaBtn.classList.toggle('on', onlyaudio);
+    applyFilter();
+  });
+})();
+</script>
+</body>
+</html>

@@ -35,5 +35,17 @@ window.BOOKS = [
     tag: "已就绪",
     accent: "#22c1a4",
     url: "Basicreading200-3/Basicreading200-3.html"
+  },
+  {
+    id: "book4",
+    title: "400词 第一册",
+    subtitle: "Basic Reading 400 Key Words 1",
+    author: "Liana Robinson",
+    cover: "Basicreading400-1/thumbs/001.jpg",
+    pages: 80,
+    withAudio: 42,
+    tag: "已就绪",
+    accent: "#ff8a3d",
+    url: "Basicreading400-1/Basicreading400-1.html"
   }
 ];
