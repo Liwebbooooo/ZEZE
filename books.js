@@ -23,5 +23,17 @@ window.BOOKS = [
     tag: "已就绪",
     accent: "#7c5cff",
     url: "Basicreading200-2/Basicreading200-2.html"
+  },
+  {
+    id: "book3",
+    title: "200词 第三册",
+    subtitle: "Basic Reading 200 Key Words 3",
+    author: "Walton Burns · Laura-Claire Corson · Tamara Wilburn",
+    cover: "Basicreading200-3/thumbs/001.jpg",
+    pages: 80,
+    withAudio: 53,
+    tag: "已就绪",
+    accent: "#22c1a4",
+    url: "Basicreading200-3/Basicreading200-3.html"
   }
 ];
