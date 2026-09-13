@@ -11,6 +11,7 @@
     --accent:#ff7eb6; --accent2:#7c5cff; --accent3:#22c1a4;
     --chip:#fff0f7; --chip-on:#ff7eb6; --line:#eceffb;
     --shadow:0 10px 30px rgba(70,80,140,.12);
+    --cols:4;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -51,19 +52,20 @@
   .search:focus{border-color:var(--accent2);box-shadow:0 0 0 4px rgba(124,92,255,.12);}
   .count{font-size:13px;color:var(--sub);}
 
+  /* ---------- 4 列网格：封面一 · 封面二 · P2 · P3 … ---------- */
   .grid{
-    /* 对开书：每行左右两页，整组居中且两页紧邻 */
-    --gap:22px;
-    display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);
+    display:grid;
+    grid-template-columns:repeat(var(--cols), minmax(0,1fr));
+    gap:18px;
+    justify-items:center;
+    align-items:start;
   }
   .page{
-    background:var(--card);border-radius:22px;padding:12px;box-shadow:var(--shadow);
-    display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
+    background:var(--card);border-radius:20px;padding:10px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;
+    border-top:3px solid transparent;width:100%;
+    max-width:clamp(150px, calc((100vh - 300px) * .70), 340px);
     transition:transform .15s ease,box-shadow .2s ease,background .2s ease;
-    border-top:3px solid transparent;
-    width:calc(50% - var(--gap)/2);
-    /* 按视口高度限制卡片宽度，保证平板横屏一整跨页能在一屏内看完 */
-    max-width:clamp(200px, calc((100vh - 330px) * .75), 520px);
   }
   .page:active{transform:scale(.99);}
   .page.playing{
@@ -71,17 +73,16 @@
     border-top-color:var(--accent);
     box-shadow:0 14px 36px rgba(255,126,182,.28);
   }
-  @media (max-width:1000px){ .grid{--gap:16px;} }
-  @media (max-width:560px){ .grid{--gap:12px;} .page{padding:9px;gap:8px;} }
-  /* 横屏矮屏（手机横放等）：压缩顶栏与卡片，避免一跨页超出一屏 */
+  @media (max-width:1100px){ .grid{--cols:4; gap:14px;} }
+  @media (max-width:860px){  .grid{--cols:3; gap:14px;} }
+  @media (max-width:620px){  .grid{--cols:2; gap:12px;} .page{padding:8px;gap:7px;} }
   @media (max-height:600px){
     body{padding-top:10px;padding-bottom:120px;}
     header.top{margin-bottom:8px;gap:8px;}
     .logo{width:36px;height:36px;font-size:20px;border-radius:12px;}
-    h1{font-size:16px;}
-    .sub{display:none;}
+    h1{font-size:16px;} .sub{display:inline;}
     .search{width:min(30vw,140px);padding:7px 12px;font-size:13px;}
-    .page{ max-width:clamp(180px, calc((100vh - 150px) * .75), 520px); }
+    .page{max-width:clamp(140px, calc((100vh - 150px) * .70), 340px);}
   }
 
   /* 顶部环境警告条 */
@@ -100,28 +101,48 @@
   }
   .thumb img{width:100%;height:100%;object-fit:contain;display:block;}
   .badge{
-    position:absolute;top:10px;left:10px;background:rgba(43,47,68,.78);color:#fff;
-    font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;backdrop-filter:blur(4px);
+    position:absolute;top:8px;left:8px;
+    background:linear-gradient(135deg,#7c5cff,#ff7eb6);color:#fff;
+    font-size:14px;font-weight:800;padding:5px 13px;border-radius:999px;
+    letter-spacing:.5px;box-shadow:0 4px 12px rgba(124,92,255,.35);
   }
-  .wave{position:absolute;bottom:10px;right:10px;display:none;gap:3px;align-items:flex-end;height:24px;}
+  .wave{position:absolute;bottom:8px;right:8px;display:none;gap:3px;align-items:flex-end;height:20px;}
   .page.playing .wave{display:flex;}
-  .wave i{width:4px;background:var(--accent);border-radius:3px;animation:w 1s infinite ease-in-out;}
+  .wave i{width:3px;background:var(--accent);border-radius:3px;animation:w 1s infinite ease-in-out;}
   .wave i:nth-child(2){animation-delay:.2s}.wave i:nth-child(3){animation-delay:.4s}.wave i:nth-child(4){animation-delay:.6s}
-  @keyframes w{0%,100%{height:6px}50%{height:22px}}
+  @keyframes w{0%,100%{height:5px}50%{height:18px}}
   .fname{font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);word-break:break-word;}
   .fname .ext{color:var(--sub);font-weight:600;}
-  .tracks{display:flex;gap:8px;flex-wrap:wrap;}
+  /* ---------- 音频区：统一上下 2 排，每格都有背景 ---------- */
+  .tracks{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    grid-template-rows:repeat(2, 40px);
+    grid-auto-rows:40px;
+    gap:6px;
+    padding:7px;
+    background:#f5f7fd;
+    border:1px solid var(--line);
+    border-radius:16px;
+  }
   .track{
-    flex:1 1 auto;min-width:46px;border:none;cursor:pointer;border-radius:14px;
-    background:var(--chip);color:#c23b7e;font-weight:800;font-size:16px;
-    padding:12px 0;display:flex;align-items:center;justify-content:center;gap:6px;
+    border:1px solid #ffe3f0;cursor:pointer;border-radius:11px;
+    background:var(--chip);color:#c23b7e;font-weight:800;font-size:14px;
+    padding:0;display:flex;align-items:center;justify-content:center;gap:5px;
     transition:background .15s ease,color .15s ease,transform .1s ease;
   }
+  .track.wide{grid-column:1 / -1;grid-row:1 / -1;font-size:17px;}
   .track:hover{background:#ffe0ef;}
   .track:active{transform:scale(.94);}
-  .track.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 8px 18px rgba(255,126,182,.4);}
-  .track .ic{font-size:13px;}
-  .noaudio{font-size:12px;color:var(--sub);background:#f4f6fb;border-radius:14px;padding:12px 0;text-align:center;font-weight:700;}
+  .track.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(255,126,182,.4);}
+  .track .ic{font-size:12px;}
+  .track.ghost{
+    grid-column:1 / -1;grid-row:1 / -1;
+    background:#eef0f7;border:1px dashed #dde1ef;color:#9aa0b5;
+    font-size:12px;font-weight:700;cursor:default;
+  }
+  .track.ghost:active{transform:none;}
+  .noaudio{font-size:12px;color:var(--sub);background:#f4f6fb;border-radius:12px;padding:9px 0;text-align:center;font-weight:700;}
   .togglebtn{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font-size:14px;cursor:pointer;color:var(--ink);font-weight:700;transition:all .15s ease;}
   .togglebtn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(255,126,182,.35);}
 
@@ -152,6 +173,69 @@
   .hidden{display:none!important;}
   .empty{text-align:center;color:var(--sub);padding:40px;font-size:14px;}
   footer{text-align:center;color:var(--sub);font-size:12px;margin-top:26px;}
+
+  /* ===== 顶部条状播放区（新增） ===== */
+  .tape{
+    background:#fff;border-radius:22px;padding:14px 16px;box-shadow:var(--shadow);
+    margin:0 0 18px;border:1.5px solid var(--line);
+    display:flex;flex-direction:column;   /* 纵向撑开：头部固定，网格吃掉剩余高度 */
+  }
+  .tape-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+  .tape-title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;color:var(--ink);}
+  .tape-title .ic{width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;}
+  .tape-info{color:var(--sub);font-size:12px;}
+  .tape-tools{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+  .tape-btn{
+    border:1.5px solid var(--line);background:#fff;border-radius:999px;
+    padding:7px 14px;font-size:12px;font-weight:800;color:#c23b7e;cursor:pointer;
+  }
+  .tape-btn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+  .tape-btn.icon{min-width:36px;padding:7px 10px;}
+
+  .tape-row{
+    display:grid;grid-template-columns:repeat(14, minmax(0,1fr));
+    gap:6px;padding:4px 2px 6px;
+    flex:1 1 auto;
+    grid-auto-rows:minmax(26px, 1fr);
+    align-content:stretch;
+  }
+  .tape-row.scroll{grid-template-columns:none;display:flex;flex-wrap:nowrap;overflow-x:auto;align-items:center;}
+  .tape-row::-webkit-scrollbar{height:8px;}
+  .tape-row::-webkit-scrollbar-thumb{background:var(--accent);border-radius:99px;}
+  .tape-row::-webkit-scrollbar-track{background:#f4f6fb;border-radius:99px;}
+  .tape-chip{
+    cursor:pointer;
+    background:var(--chip);color:#c23b7e;
+    font-weight:800;font-size:13.5px;
+    border:1.5px solid #ffe3f0;border-radius:12px;
+    padding:7px 4px;display:inline-flex;align-items:center;justify-content:center;gap:4px;
+    transition:all .15s ease;user-select:none;text-align:center;
+    position:relative;
+  }
+  .tape-row.scroll .tape-chip{flex:0 0 auto;min-width:54px;padding:8px 12px;}
+  .tape-chip:hover{background:#ffe0ef;}
+  .tape-chip:active{transform:scale(.94);}
+  .tape-chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;
+    box-shadow:0 6px 14px rgba(255,126,182,.4);}
+  .tape-chip .ic{font-size:10px;opacity:.85;}
+  .tape-chip.on .ic{opacity:1;}
+  .tape-chip .row{position:absolute;top:2px;left:4px;font-size:9px;color:#c23b7e;opacity:.45;font-weight:700;}
+  .tape-now{
+    display:inline-block;margin-left:6px;font-size:12px;color:#c23b7e;font-weight:700;
+    background:#fff0f7;border-radius:999px;padding:2px 9px;
+  }
+  @media (max-width:1100px){ .tape-row{grid-template-columns:repeat(10, minmax(0,1fr));} }
+  @media (max-width:860px){
+    .tape{padding:12px;}
+    .tape-head{gap:8px;margin-bottom:8px;}
+    .tape-btn{padding:6px 11px;font-size:11.5px;}
+    .tape-btn.icon{min-width:32px;padding:6px 8px;}
+    .tape-chip{padding:5px 3px;font-size:12.5px;border-radius:10px;}
+    .tape-chip .row{font-size:8px;top:1px;left:3px;}
+  }
+  @media (max-width:560px){ .tape-row{grid-template-columns:repeat(5,  minmax(0,1fr));} }
+
 </style>
 </head>
 <body>
@@ -169,6 +253,31 @@
       <span id="count" class="count"></span>
     </div>
   </header>
+
+  <!-- 顶部条状播放区：全部音频按 Track 顺序排列 -->
+  <div class="tape" id="tape">
+    <div class="tape-head">
+      <div class="tape-title">
+        <span class="ic">▤</span>
+        全部音频 <span class="tape-now" id="tapeNow">—</span>
+      </div>
+      <div class="tape-info" id="tapeInfo">—</div>
+      <div class="tape-tools">
+        <button id="tGrid" class="tape-btn on">网格</button>
+        <button id="tScroll" class="tape-btn">单行横滚</button>
+        <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+        <button id="tPrev" class="tape-btn icon" title="上一首">⏮</button>
+        <button id="tNext" class="tape-btn icon" title="下一首">⏭</button>
+        <button id="tRand" class="tape-btn icon" title="随机一首">🎲</button>
+        <button id="tLoopOff" class="tape-btn on" title="不循环：播完就停">循环 关</button>
+        <button id="tLoopOne" class="tape-btn" title="单曲循环：当前这首无限重播">单曲</button>
+        <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+        <button id="tChain" class="tape-btn">连播 ▶</button>
+        <button id="tStop" class="tape-btn">⏹ 停止</button>
+      </div>
+    </div>
+    <div class="tape-row" id="tapeRow"></div>
+  </div>
 
   <div id="warn" class="warn hidden">
     <b>⚠ 当前打开方式读取不到本地音频 / 图片</b>
@@ -212,6 +321,7 @@
   var dthumbimg = document.getElementById('dthumbimg');
   var search = document.getElementById('search');
   var countEl = document.getElementById('count');
+  var tapeChain = false;        // 顶部条状区连播状态
 
   var state = { n:null, track:null }; // currently loaded
 
@@ -251,26 +361,29 @@
     page.appendChild(thumb);
 
     page.dataset.hasaudio = (it.tracks && it.tracks.length) ? '1' : '0';
-    if(it.tracks && it.tracks.length){
-      var tr = document.createElement('div');
-      tr.className = 'tracks';
-      it.tracks.forEach(function(tk, idx){
+
+    // 音频区：所有卡片都渲染（统一上下 2 排 + 背景），空条目不显示按钮
+    var tr = document.createElement('div');
+    tr.className = 'tracks';
+    var list = (it.tracks || []).filter(function(tk){ return tk && tk.src; });
+    if(list.length){
+      (it.tracks || []).forEach(function(tk, idx){
+        if(!tk || !tk.src) return;
         var b = document.createElement('button');
-        b.className = 'track';
-        b.dataset.track = idx;
+        b.className = 'track' + (list.length===1 ? ' wide' : '');
+        b.dataset.idx = idx;
         b.innerHTML = '<span class="ic">▶</span>' + audioNum(tk);
         b.title = (tk.src || '').split('/').pop();
         b.addEventListener('click', function(){ toggle(it, idx); });
         tr.appendChild(b);
       });
-      page.appendChild(tr);
     } else {
-      page.classList.add('noaudio-card');
-      var na = document.createElement('div');
-      na.className = 'noaudio';
-      na.textContent = '暂无音频';
-      page.appendChild(na);
+      var gh = document.createElement('div');
+      gh.className = 'track ghost';
+      gh.textContent = '暂无音频';
+      tr.appendChild(gh);
     }
+    page.appendChild(tr);
     return page;
   }
 
@@ -288,9 +401,131 @@
   }
   render();
 
+  /* ===== 顶部条状播放区 ===== */
+  var tapeRow = document.getElementById('tapeRow');
+  var tapeInfo = document.getElementById('tapeInfo');
+  var tapeNow = document.getElementById('tapeNow');
+  var tapeList = (function(){
+    var seen = {}, arr = [];
+    items.forEach(function(it){
+      (it.tracks||[]).forEach(function(tk){
+        if(!tk || !tk.src || seen[tk.src]) return;
+        seen[tk.src] = 1;
+        var m = /Track(\d+)/.exec(tk.src);
+        arr.push({ src: tk.src, num: m?parseInt(m[1],10):0, page: it.page, n: it.n, file: it.file, item: it });
+      });
+    });
+    arr.sort(function(a,b){ return a.num-b.num; });
+    return arr;
+  })();
+  tapeInfo.textContent = '共 ' + tapeList.length + ' 条 · 默认 ' + Math.ceil(tapeList.length/14) + ' 行 14 列';
+  tapeList.forEach(function(t, i){
+    var c = document.createElement('div');
+    c.className = 'tape-chip';
+    c.dataset.i = i;
+    c.dataset.src = encodeURI(t.src);
+    var rowNo = Math.floor(i/14) + 1;   // 行号
+    var pLabel = t.page != null ? 'P' + t.page : '#' + t.n;
+    c.innerHTML = '<span class="row">' + pLabel + '</span><span class="ic">▶</span>' + (t.num<10?'0':'') + t.num;
+    c.title = '第 ' + rowNo + ' 行 · P' + t.page + ' · ' + t.src.split('/').pop();
+    c.addEventListener('click', function(){ playTape(i, c); });
+    tapeRow.appendChild(c);
+  });
+
+  function findTrackIdx(it, src){
+    var list = it.tracks || [];
+    for(var k=0;k<list.length;k++) if(list[k] && list[k].src === src) return k;
+    return 0;
+  }
+  function currentTapeIdx(){
+    var el = document.querySelector('.tape-chip.on');
+    return el ? parseInt(el.dataset.i, 10) : -1;
+  }
+  var lastTapeIdx = -1;
+  function playTape(i, el, auto){
+    if(i<0 || i>=tapeList.length) return;
+    lastTapeIdx = i;
+    var t = tapeList[i];
+    state.n = t.n; state.track = findTrackIdx(t.item, t.src);
+    clearPlayingUI();
+    el.classList.add('on');
+    loadAndPlay(t.item, state.track);
+    if(auto){ el.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }
+  }
+  var tapeLoop = 'off';
+  function playTapeNext(){
+    var i = lastTapeIdx >= 0 ? lastTapeIdx : currentTapeIdx();
+    var j;
+    if(tapeLoop==='one'){ j = i >= 0 ? i : 0; }
+    else if(i < 0){ j = 0; }
+    else if(i+1 >= tapeList.length){ tapeNow.textContent = '已播完最后一条'; return; }
+    else { j = i+1; }
+    playTape(j, tapeRow.children[j], true);
+  }
+  function playTapePrev(){
+    var i = lastTapeIdx >= 0 ? lastTapeIdx : currentTapeIdx();
+    if(i <= 0) return;
+    playTape(i-1, tapeRow.children[i-1], true);
+  }
+  function playTapeRand(){
+    if(tapeList.length<2) return;
+    var cur = lastTapeIdx >= 0 ? lastTapeIdx : currentTapeIdx();
+    var j;
+    do { j = Math.floor(Math.random() * tapeList.length); } while(j === cur);
+    playTape(j, tapeRow.children[j], true);
+  }
+  document.getElementById('tGrid').addEventListener('click', function(){
+    tapeRow.classList.remove('scroll');
+    this.classList.add('on'); document.getElementById('tScroll').classList.remove('on');
+  });
+  document.getElementById('tScroll').addEventListener('click', function(){
+    tapeRow.classList.add('scroll');
+    this.classList.add('on'); document.getElementById('tGrid').classList.remove('on');
+  });
+  document.getElementById('tPrev').addEventListener('click', playTapePrev);
+  document.getElementById('tNext').addEventListener('click', playTapeNext);
+  document.getElementById('tRand').addEventListener('click', playTapeRand);
+  var loopBtns = {
+    off: document.getElementById('tLoopOff'),
+    one: document.getElementById('tLoopOne')
+  };
+  var chainBtn = document.getElementById('tChain');
+  function setLoop(mode){
+    tapeLoop = mode;
+    Object.keys(loopBtns).forEach(function(k){ loopBtns[k].classList.toggle('on', k===mode); });
+    if(mode==='one' && tapeChain){
+      tapeChain = false;
+      chainBtn.classList.remove('on');
+      chainBtn.textContent = '连播 ▶';
+    }
+  }
+  function setChain(on){
+    if(!on){
+      tapeChain = false;
+      chainBtn.classList.remove('on');
+      chainBtn.textContent = '连播 ▶';
+      return;
+    }
+    tapeChain = true;
+    chainBtn.classList.add('on');
+    chainBtn.textContent = '连播中 ●';
+    if(tapeLoop!=='off') setLoop('off');
+  }
+  loopBtns.off.addEventListener('click', function(){ setLoop('off'); });
+  loopBtns.one.addEventListener('click', function(){ setLoop('one'); });
+  chainBtn.addEventListener('click', function(){ setChain(!tapeChain); });
+  setLoop('off');
+  document.getElementById('tStop').addEventListener('click', function(){
+    audio.pause(); audio.currentTime = 0;
+    setChain(false);
+    lastTapeIdx = -1;
+    clearPlayingUI(); tapeNow.textContent = '已停止';
+  });
+
   function clearPlayingUI(){
     document.querySelectorAll('.page.playing').forEach(function(c){ c.classList.remove('playing'); });
     document.querySelectorAll('.track.on').forEach(function(b){ b.classList.remove('on'); b.querySelector('.ic').textContent='▶'; });
+    document.querySelectorAll('.tape-chip.on').forEach(function(b){ b.classList.remove('on'); });
   }
 
   function toggle(it, idx){
@@ -322,8 +557,15 @@
     var page = document.querySelector('.page[data-n="'+it.n+'"]');
     if(page){ page.classList.add('playing'); }
     if(page){
-      var btns = page.querySelectorAll('.track');
-      if(btns[idx]){ btns[idx].classList.add('on'); btns[idx].querySelector('.ic').textContent='⏸'; }
+      var b = page.querySelector('.track[data-idx="'+idx+'"]');
+      if(b){ b.classList.add('on'); b.querySelector('.ic').textContent='⏸'; }
+    }
+    // 同步点亮顶部条状区对应 chip
+    var tk = (it.tracks||[])[idx];
+    if(tk && tk.src){
+      document.querySelectorAll('.tape-chip').forEach(function(ch){
+        ch.classList.toggle('on', ch.dataset.src === encodeURI(tk.src));
+      });
     }
   }
 
@@ -347,6 +589,12 @@
   });
   audio.addEventListener('ended', function(){
     dplay.textContent='▶'; clearPlayingUI(); fill.style.width='0%'; curEl.textContent='0:00';
+    // 单曲循环 / 连播：自动继续往下放
+    if(typeof tapeLoop!=='undefined' && tapeLoop && tapeLoop!=='off'){
+      playTapeNext();
+    } else if(typeof tapeChain!=='undefined' && tapeChain){
+      playTapeNext();
+    }
   });
   audio.addEventListener('timeupdate', function(){
     if(audio.duration){ fill.style.width = (audio.currentTime/audio.duration*100)+'%'; }
@@ -414,6 +662,7 @@
     });
     document.getElementById('empty').classList.toggle('hidden', shown>0);
     countEl.textContent = (q||onlyaudio) ? (shown+' / '+items.length) : '';
+    syncTapeHeight();   // 可见卡片变了，重新对齐音频区高度
   }
   search.addEventListener('input', applyFilter);
   oaBtn.addEventListener('click', function(){
@@ -421,6 +670,24 @@
     oaBtn.classList.toggle('on', onlyaudio);
     applyFilter();
   });
+  /* ===== 让「全部音频」外框高度 = 封面卡片高度（随视口/列数自动重算） ===== */
+  var tapeEl = document.getElementById('tape');
+  function syncTapeHeight(){
+    if(!tapeEl) return;
+    var cards = document.querySelectorAll('.grid .page'), h = 0;
+    for(var k=0; k<cards.length; k++){
+      if(cards[k].style.display === 'none') continue;
+      h = cards[k].getBoundingClientRect().height;
+      break;
+    }
+    tapeEl.style.minHeight = h > 0 ? Math.round(h) + 'px' : '';
+  }
+  syncTapeHeight();
+  var rtTape;
+  window.addEventListener('resize', function(){ clearTimeout(rtTape); rtTape = setTimeout(syncTapeHeight, 120); });
+  window.addEventListener('orientationchange', function(){ setTimeout(syncTapeHeight, 200); });
+  window.addEventListener('load', syncTapeHeight);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(syncTapeHeight); }
 })();
 </script>
 </body>
