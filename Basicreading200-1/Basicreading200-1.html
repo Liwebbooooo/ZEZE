@@ -160,6 +160,72 @@
   .hidden{display:none!important;}
   .empty{text-align:center;color:var(--sub);padding:40px;font-size:14px;}
   footer{text-align:center;color:var(--sub);font-size:12px;margin-top:26px;}
+
+  /* ===== 顶部条状播放区（新增） ===== */
+  .tape{
+    background:#fff;border-radius:22px;padding:14px 16px;box-shadow:var(--shadow);
+    margin:0 0 18px;border:1.5px solid var(--line);
+    display:flex;flex-direction:column;   /* 纵向撑开：头部固定，网格吃掉剩余高度 */
+  }
+  .tape-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+  .tape-title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;color:var(--ink);}
+  .tape-title .ic{width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;}
+  .tape-info{color:var(--sub);font-size:12px;}
+  .tape-tools{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+  .tape-btn{
+    border:1.5px solid var(--line);background:#fff;border-radius:999px;
+    padding:7px 14px;font-size:12px;font-weight:800;color:#c23b7e;cursor:pointer;
+  }
+  .tape-btn.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+  .tape-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+  .tape-btn.primary:hover{filter:brightness(1.06);}
+  .tape-btn.icon{min-width:36px;padding:7px 10px;}
+
+  /* 默认 7 行网格（98 ÷ 7 = 14 列），按钮等宽对齐；窄屏自动 8 列 ~ 12 列 */
+  .tape-row{
+    display:grid;grid-template-columns:repeat(14, minmax(0,1fr));
+    gap:6px;padding:4px 2px 6px;
+    flex:1 1 auto;                          /* 吃掉 .tape 剩余高度 */
+    grid-auto-rows:minmax(26px, 1fr);       /* 行高自适应：整体高度对齐封面 */
+    align-content:stretch;
+  }
+  .tape-row.scroll{grid-template-columns:none;display:flex;flex-wrap:nowrap;overflow-x:auto;align-items:center;}
+  .tape-row::-webkit-scrollbar{height:8px;}
+  .tape-row::-webkit-scrollbar-thumb{background:var(--accent);border-radius:99px;}
+  .tape-row::-webkit-scrollbar-track{background:#f4f6fb;border-radius:99px;}
+  .tape-chip{
+    cursor:pointer;
+    background:var(--chip);color:#c23b7e;
+    font-weight:800;font-size:13.5px;
+    border:1.5px solid #ffe3f0;border-radius:12px;
+    padding:7px 4px;display:inline-flex;align-items:center;justify-content:center;gap:4px;
+    transition:all .15s ease;user-select:none;text-align:center;
+  }
+  .tape-row.scroll .tape-chip{flex:0 0 auto;min-width:54px;padding:8px 12px;}
+  .tape-chip:hover{background:#ffe0ef;}
+  .tape-chip:active{transform:scale(.94);}
+  .tape-chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;
+    box-shadow:0 6px 14px rgba(255,126,182,.4);}
+  .tape-chip .ic{font-size:10px;opacity:.85;}
+  .tape-chip.on .ic{opacity:1;}
+  .tape-chip .row{position:absolute;top:2px;left:4px;font-size:9px;color:#c23b7e;opacity:.45;font-weight:700;}
+  .tape-chip{position:relative;}
+  .tape-now{
+    display:inline-block;margin-left:6px;font-size:12px;color:#c23b7e;font-weight:700;
+    background:#fff0f7;border-radius:999px;padding:2px 9px;
+  }
+  @media (max-width:1100px){ .tape-row{grid-template-columns:repeat(10, minmax(0,1fr));} }
+  /* 窄屏（平板竖/手机）：整体紧凑一档，保证音频区仍能贴合封面高度 */
+  @media (max-width:860px){
+    .tape{padding:12px;}
+    .tape-head{gap:8px;margin-bottom:8px;}
+    .tape-btn{padding:6px 11px;font-size:11.5px;}
+    .tape-btn.icon{min-width:32px;padding:6px 8px;}
+    .tape-chip{padding:5px 3px;font-size:12.5px;border-radius:10px;}
+    .tape-chip .row{font-size:8px;top:1px;left:3px;}
+  }
+  @media (max-width:560px){ .tape-row{grid-template-columns:repeat(5,  minmax(0,1fr));} }
 </style>
 </head>
 <body>
@@ -177,6 +243,31 @@
       <span id="count" class="count"></span>
     </div>
   </header>
+
+  <!-- 顶部条状播放区：全部音频按 Track 顺序横向排列 -->
+  <div class="tape" id="tape">
+    <div class="tape-head">
+      <div class="tape-title">
+        <span class="ic">▤</span>
+        全部音频 <span class="tape-now" id="tapeNow">—</span>
+      </div>
+      <div class="tape-info" id="tapeInfo">—</div>
+      <div class="tape-tools">
+        <button id="tGrid" class="tape-btn on">7 行网格</button>
+        <button id="tScroll" class="tape-btn">单行横滚</button>
+        <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+        <button id="tPrev" class="tape-btn icon" title="上一首">⏮</button>
+        <button id="tNext" class="tape-btn icon" title="下一首">⏭</button>
+        <button id="tRand" class="tape-btn icon" title="随机一首">🎲</button>
+        <button id="tLoopOff" class="tape-btn on" title="不循环：播完就停">循环 关</button>
+        <button id="tLoopOne" class="tape-btn" title="单曲循环：当前这首无限重播">单曲</button>
+        <span style="width:1px;height:22px;background:var(--line);margin:0 2px"></span>
+        <button id="tChain" class="tape-btn">连播 ▶</button>
+        <button id="tStop" class="tape-btn">⏹ 停止</button>
+      </div>
+    </div>
+    <div class="tape-row" id="tapeRow"></div>
+  </div>
 
   <div id="grid" class="grid"></div>
   <div id="empty" class="empty hidden">没有匹配的文件</div>
@@ -214,6 +305,7 @@
   var search = document.getElementById('search');
   var countEl = document.getElementById('count');
   var state = { n:null, track:null };
+  var tapeChain = false;        // 顶部条状区连播状态
 
   function enc(p){ return encodeURI(p); }
   function fmt(t){ if(!isFinite(t)||t<0) t=0; var m=Math.floor(t/60), s=Math.floor(t%60); return m+":"+(s<10?"0":"")+s; }
@@ -288,9 +380,140 @@
   }
   render();
 
+  /* ===== 顶部条状播放区 ===== */
+  var tapeRow = document.getElementById('tapeRow');
+  var tapeInfo = document.getElementById('tapeInfo');
+  var tapeNow = document.getElementById('tapeNow');
+  var tapeList = (function(){
+    var seen = {}, arr = [];
+    items.forEach(function(it){
+      (it.tracks||[]).forEach(function(tk){
+        if(!tk || !tk.src || seen[tk.src]) return;
+        seen[tk.src] = 1;
+        var m = /Track(\d+)/.exec(tk.src);
+        arr.push({ src: tk.src, num: m?parseInt(m[1],10):0, page: it.page, n: it.n, file: it.file, item: it });
+      });
+    });
+    arr.sort(function(a,b){ return a.num-b.num; });
+    return arr;
+  })();
+  tapeInfo.textContent = '共 ' + tapeList.length + ' 条 · 默认 7 行 14 列';
+  tapeList.forEach(function(t, i){
+    var c = document.createElement('div');
+    c.className = 'tape-chip';
+    c.dataset.i = i;
+    c.dataset.src = encodeURI(t.src);
+    var rowNo = Math.floor(i/14) + 1;   // 行号（1..7）
+    // 行首标 P 行号 = 该行第一条音轨对应的页码
+    var pLabel = t.page != null ? 'P' + t.page : '#' + t.n;
+    c.innerHTML = '<span class="row">' + pLabel + '</span><span class="ic">▶</span>' + (t.num<10?'0':'') + t.num;
+    c.title = '第 ' + rowNo + ' 行 · P' + t.page + ' · ' + t.src.split('/').pop();
+    c.addEventListener('click', function(){ playTape(i, c); });
+    tapeRow.appendChild(c);
+  });
+
+  function findTrackIdx(it, src){
+    var list = it.tracks || [];
+    for(var k=0;k<list.length;k++) if(list[k] && list[k].src === src) return k;
+    return 0;
+  }
+  function currentTapeIdx(){
+    var el = document.querySelector('.tape-chip.on');
+    return el ? parseInt(el.dataset.i, 10) : -1;
+  }
+  // 跟踪「上一次实际点/自动播放的 chip index」，让 ended → playTapeNext 不会因为 .on 被清空而跳到 0
+  var lastTapeIdx = -1;
+  // playTape(i, el, auto)：auto=true 时滚到 chip 可见（自动跳歌用），用户手动点 chip 不滚（避免把工具栏滚出屏幕）
+  function playTape(i, el, auto){
+    if(i<0 || i>=tapeList.length) return;
+    lastTapeIdx = i;
+    var t = tapeList[i];
+    state.n = t.n; state.track = findTrackIdx(t.item, t.src);
+    clearPlayingUI();
+    el.classList.add('on');
+    loadAndPlay(t.item, state.track);  // 复用原路径：markPlaying / dock / 进度
+    if(auto){ el.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }
+  }
+  // 循环模式：'off' | 'all' | 'one'
+  var tapeLoop = 'off';
+  function playTapeNext(){
+    var i = lastTapeIdx >= 0 ? lastTapeIdx : currentTapeIdx();
+    var j;
+    if(tapeLoop==='one'){ j = i >= 0 ? i : 0; }  // 单曲循环：再放自己
+    else if(i < 0){ j = 0; }
+    else if(i+1 >= tapeList.length){ tapeNow.textContent = '已播完最后一条'; return; }
+    else { j = i+1; }
+    playTape(j, tapeRow.children[j], true);  // 自动跳：滚到 chip 可见
+  }
+  function playTapePrev(){
+    var i = lastTapeIdx >= 0 ? lastTapeIdx : currentTapeIdx();
+    if(i <= 0) return;
+    playTape(i-1, tapeRow.children[i-1], true);
+  }
+  function playTapeRand(){
+    if(tapeList.length<2) return;
+    var cur = lastTapeIdx >= 0 ? lastTapeIdx : currentTapeIdx();
+    var j;
+    do { j = Math.floor(Math.random() * tapeList.length); } while(j === cur);
+    playTape(j, tapeRow.children[j], true);
+  }
+  // 布局切换
+  document.getElementById('tGrid').addEventListener('click', function(){
+    tapeRow.classList.remove('scroll');
+    this.classList.add('on'); document.getElementById('tScroll').classList.remove('on');
+  });
+  document.getElementById('tScroll').addEventListener('click', function(){
+    tapeRow.classList.add('scroll');
+    this.classList.add('on'); document.getElementById('tGrid').classList.remove('on');
+  });
+  // 上下首 / 随机
+  document.getElementById('tPrev').addEventListener('click', playTapePrev);
+  document.getElementById('tNext').addEventListener('click', playTapeNext);
+  document.getElementById('tRand').addEventListener('click', playTapeRand);
+  // 循环模式：只剩 关 / 单曲 两个互斥按钮，默认循环关
+  var loopBtns = {
+    off: document.getElementById('tLoopOff'),
+    one: document.getElementById('tLoopOne')
+  };
+  var chainBtn = document.getElementById('tChain');
+  function setLoop(mode){
+    tapeLoop = mode;
+    Object.keys(loopBtns).forEach(function(k){ loopBtns[k].classList.toggle('on', k===mode); });
+    // 单曲 与 连播 互斥单选：开单曲 → 自动关连播
+    if(mode==='one' && tapeChain){
+      tapeChain = false;
+      chainBtn.classList.remove('on');
+      chainBtn.textContent = '连播 ▶';
+    }
+  }
+  function setChain(on){
+    if(!on){  // 关连播：直接关
+      tapeChain = false;
+      chainBtn.classList.remove('on');
+      chainBtn.textContent = '连播 ▶';
+      return;
+    }
+    // 开连播：点亮连播，并自动把「单曲」切回「循环 关」（互斥单选，不是拒绝点击）
+    tapeChain = true;
+    chainBtn.classList.add('on');
+    chainBtn.textContent = '连播中 ●';
+    if(tapeLoop!=='off') setLoop('off');
+  }
+  loopBtns.off.addEventListener('click', function(){ setLoop('off'); });
+  loopBtns.one.addEventListener('click', function(){ setLoop('one'); });
+  chainBtn.addEventListener('click', function(){ setChain(!tapeChain); });
+  setLoop('off');  // 初始化：默认循环关
+  document.getElementById('tStop').addEventListener('click', function(){
+    audio.pause(); audio.currentTime = 0;
+    setChain(false);   // 连播关（统一走 setChain）
+    lastTapeIdx = -1;  // 停止后重置，下次播下一首才会从 0 开始
+    clearPlayingUI(); tapeNow.textContent = '已停止';
+  });
+
   function clearPlayingUI(){
     document.querySelectorAll('.page.playing').forEach(function(c){ c.classList.remove('playing'); });
     document.querySelectorAll('.track.on').forEach(function(b){ b.classList.remove('on'); b.querySelector('.ic').textContent='▶'; });
+    document.querySelectorAll('.tape-chip.on').forEach(function(b){ b.classList.remove('on'); });
   }
   function toggle(it, idx){
     if(!it.tracks || !it.tracks[idx]){
@@ -317,6 +540,13 @@
     page.classList.add('playing');
     var b = page.querySelector('.track[data-idx="'+idx+'"]');
     if(b){ b.classList.add('on'); b.querySelector('.ic').textContent='⏸'; }
+    // 同步点亮顶部条状区对应 chip
+    var tk = (it.tracks||[])[idx];
+    if(tk && tk.src){
+      document.querySelectorAll('.tape-chip').forEach(function(ch){
+        ch.classList.toggle('on', ch.dataset.src === encodeURI(tk.src));
+      });
+    }
   }
   function showDock(it, tk){
     dock.classList.remove('hidden');
@@ -332,7 +562,16 @@
     var page = document.querySelector('.page[data-n="'+state.n+'"]');
     if(page){ var b=page.querySelector('.track.on'); if(b) b.querySelector('.ic').textContent='▶'; }
   });
-  audio.addEventListener('ended', function(){ dplay.textContent='▶'; clearPlayingUI(); fill.style.width='0%'; curEl.textContent='0:00'; });
+  audio.addEventListener('ended', function(){
+    dplay.textContent='▶'; clearPlayingUI(); fill.style.width='0%'; curEl.textContent='0:00';
+    // 循环模式 = 全部 / 单曲：不管连播是否开，都要继续放
+    if(typeof tapeLoop!=='undefined' && tapeLoop && tapeLoop!=='off'){
+      playTapeNext();
+    } else if(typeof tapeChain!=='undefined' && tapeChain){
+      // 连播开启 + 循环关：播完最后一首就停
+      playTapeNext();
+    }
+  });
   audio.addEventListener('timeupdate', function(){
     if(audio.duration){ fill.style.width = (audio.currentTime/audio.duration*100)+'%'; }
     curEl.textContent = fmt(audio.currentTime);
@@ -359,9 +598,29 @@
     });
     document.getElementById('empty').classList.toggle('hidden', shown>0);
     countEl.textContent = (q||onlyaudio) ? (shown+' / '+items.length) : '';
+    syncTapeHeight();   // 可见卡片变了，重新对齐音频区高度
   }
   search.addEventListener('input', applyFilter);
   oaBtn.addEventListener('click', function(){ onlyaudio=!onlyaudio; oaBtn.classList.toggle('on', onlyaudio); applyFilter(); });
+
+  /* ===== 让「全部音频」外框高度 = 封面卡片高度（随视口/列数自动重算） ===== */
+  var tapeEl = document.getElementById('tape');
+  function syncTapeHeight(){
+    if(!tapeEl) return;
+    var cards = document.querySelectorAll('.grid .page'), h = 0;
+    for(var k=0; k<cards.length; k++){          // 取第一张「可见」卡片（结构一致，一张即可代表）
+      if(cards[k].style.display === 'none') continue;
+      h = cards[k].getBoundingClientRect().height;
+      break;
+    }
+    tapeEl.style.minHeight = h > 0 ? Math.round(h) + 'px' : '';
+  }
+  syncTapeHeight();
+  var rtTape;
+  window.addEventListener('resize', function(){ clearTimeout(rtTape); rtTape = setTimeout(syncTapeHeight, 120); });
+  window.addEventListener('orientationchange', function(){ setTimeout(syncTapeHeight, 200); });
+  window.addEventListener('load', syncTapeHeight);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(syncTapeHeight); }
 })();
 </script>
 </body>

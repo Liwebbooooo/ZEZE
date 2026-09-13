@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>大马泽 · 视频</title>
+<style>
+  :root{
+    --bg1:#fef6ff; --bg2:#eef6ff; --bg3:#f3fff6;
+    --card:#ffffff; --ink:#2b2f44; --sub:#7a8098;
+    --accent:#ff7eb6; --accent2:#7c5cff; --line:#eceffb;
+    --shadow:0 10px 30px rgba(70,80,140,.12);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, var(--bg1), transparent 60%),
+      radial-gradient(1000px 500px at 110% 0%, var(--bg2), transparent 55%),
+      linear-gradient(180deg, var(--bg3), #ffffff 60%);
+    min-height:100vh;padding:22px 16px 40px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+  header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .logo{
+    width:54px;height:54px;border-radius:18px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+    box-shadow:var(--shadow);
+  }
+  h1{font-size:clamp(20px,4.5vw,28px);margin:0;font-weight:800;letter-spacing:.5px;}
+  .sub{color:var(--sub);font-size:13px;margin-top:2px;}
+  .back{
+    flex:0 0 auto;display:flex;align-items:center;text-decoration:none;
+    color:#c23b7e;background:#fff;border:1.5px solid var(--line);border-radius:999px;
+    padding:10px 15px;font-size:13px;font-weight:800;
+  }
+  .card{
+    background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+  .vtitle{font-size:15px;font-weight:800;margin:2px 2px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .vtitle .no{
+    font-size:12px;font-weight:800;color:#fff;border-radius:999px;padding:3px 10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+  }
+  .frame{
+    position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden;
+  }
+  .frame iframe{
+    position:absolute;inset:0;width:100%;height:100%;border:0;display:block;
+  }
+  .tips{color:var(--sub);font-size:12px;margin-top:8px;line-height:1.6;}
+  .open{
+    display:inline-block;margin-top:10px;text-decoration:none;font-size:13px;font-weight:800;
+    color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-radius:999px;padding:9px 16px;
+  }
+  footer{text-align:center;color:var(--sub);font-size:12px;margin-top:22px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" href="../index.html">← 书架</a>
+    <div class="logo">▶️</div>
+    <div>
+      <h1>大马泽</h1>
+      <div class="sub">嵌入播放 · 共 <span id="total">0</span> 个视频</div>
+    </div>
+  </header>
+  <div id="list"></div>
+  <footer>如黑屏无画面，点下方按钮用 B 站原页面打开</footer>
+</div>
+
+<script>
+  // 嵌入地址统一写在这里，以后新增视频直接往数组里加即可
+  var VIDEOS = [
+    {
+      title: "大马泽",
+      // 原始嵌入：//player.bilibili.com/player.html?isOutside=true&aid=117189541632165&bvid=BV1Tzt86KEjQ&cid=41461154383&p=1
+      src: "https://player.bilibili.com/player.html?isOutside=true&aid=117189541632165&bvid=BV1Tzt86KEjQ&cid=41461154383&p=1&high_quality=1&danmaku=0",
+      page: "https://www.bilibili.com/video/BV1Tzt86KEjQ"
+    }
+  ];
+
+  var list = document.getElementById('list');
+  document.getElementById('total').textContent = VIDEOS.length;
+  VIDEOS.forEach(function(v, i){
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var t = document.createElement('div');
+    t.className = 'vtitle';
+    var no = document.createElement('span');
+    no.className = 'no';
+    no.textContent = '视频 ' + (i+1);
+    t.appendChild(no);
+    t.appendChild(document.createTextNode(v.title));
+    card.appendChild(t);
+
+    var f = document.createElement('div');
+    f.className = 'frame';
+    var ifr = document.createElement('iframe');
+    ifr.src = v.src;
+    ifr.setAttribute('scrolling','no');
+    ifr.setAttribute('frameborder','0');
+    ifr.setAttribute('allowfullscreen','true');
+    ifr.setAttribute('allow','fullscreen; autoplay; encrypted-media');
+    ifr.referrerPolicy = 'no-referrer';
+    f.appendChild(ifr);
+    card.appendChild(f);
+
+    var a = document.createElement('a');
+    a.className = 'open';
+    a.href = v.page;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = '在 B 站打开 ↗';
+    card.appendChild(a);
+
+    list.appendChild(card);
+  });
+</script>
+</body>
+</html>
